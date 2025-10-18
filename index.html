@@ -1,212 +1,190 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>忘却曲線 学習プランナー（全部入り）</title>
-<link id="manifestLink" rel="manifest">
+<title>学習プランナー（青×白・教材/単元対応）</title>
 <style>
+  /* ===== Theme: Blue × White ===== */
   :root{
-    --bg:#0f1220; --card:#171a2b; --muted:#8d95b3; --text:#e7eaf7; --accent:#6aa6ff; --accent2:#7bf1a8; --danger:#ff6b6b;
-    --border:#252a41;
+    --bg:#ffffff; --text:#0f172a; --muted:#5b6b8c; 
+    --blue:#1976d2; --blue-700:#0d47a1; --blue-50:#e3f2fd;
+    --card:#ffffff; --line:#e6eef8; --pill:#f6f9fe;
+    --accent:#1976d2; --danger:#d32f2f; --ok:#2e7d32;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
-  header{padding:16px 16px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#0f1220f5;backdrop-filter:saturate(1.2) blur(6px);z-index:5}
-  h1{margin:0;font-size:1.25rem}
-  .sub{color:var(--muted);font-size:.9rem}
-  main{max-width:1150px;margin:18px auto 80px;padding:0 16px}
-  .grid{display:grid;gap:14px}
-  @media(min-width:980px){ .grid{grid-template-columns: 1.1fr .9fr} }
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
-  .card h2{margin:.2rem 0 .6rem;font-size:1.05rem}
-  label{display:block;font-size:.85rem;color:var(--muted);margin:.35rem 0 .2rem}
-  input,select,button,textarea{
-    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0e1120;color:var(--text);
-    outline:none;transition:box-shadow .15s,border-color .15s;font-size:.95rem;
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text)}
+  a{color:var(--accent)}
+  header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#ffffffcc,#ffffff);backdrop-filter:saturate(1.2) blur(8px);
+    border-bottom:1px solid var(--line); padding:10px 14px}
+  h1{margin:0;font-weight:800;font-size:1.1rem;letter-spacing:.01em;color:var(--blue-700)}
+  .sub{color:var(--muted);font-size:.85rem}
+
+  /* ===== Layout: Mobile-first (single column) ===== */
+  main{max-width:1200px;margin:0 auto;padding:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;box-shadow:0 2px 0 #eef5ff}
+  .section-title{margin:.2rem 0 .6rem;font-size:1.02rem;color:var(--blue-700)}
+  label{display:block;margin:.45rem 0 .2rem;font-size:.85rem;color:var(--muted)}
+  input,select,textarea,button{
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text);
+    font-size:.95rem;outline:none;transition:box-shadow .15s,border-color .15s;
   }
-  input:focus,select:focus,textarea:focus{border-color:#2b3355;box-shadow:0 0 0 3px #2b335533}
+  input:focus,select:focus,textarea:focus{border-color:#b6d6ff;box-shadow:0 0 0 3px #b6d6ff55}
+  textarea{min-height:96px;resize:vertical}
+
+  .btn{cursor:pointer;background:linear-gradient(180deg,#2196f3,#1976d2);color:#fff;border:none;font-weight:700}
+  .btn.ghost{background:#fff;border:1px dashed #c9defa;color:var(--blue-700)}
+  .btn.danger{background:linear-gradient(180deg,#ef5350,#d32f2f)}
+  .btn.ok{background:linear-gradient(180deg,#43a047,#2e7d32)}
   .row{display:grid;gap:10px}
-  @media(min-width:680px){ .row{grid-template-columns:repeat(2,1fr)} }
-  .row3{display:grid;gap:10px}
-  @media(min-width:840px){ .row3{grid-template-columns:repeat(3,1fr)} }
-  .btn{cursor:pointer;background:linear-gradient(180deg,var(--accent),#4d85ff);border:none;color:#fff;font-weight:600}
-  .btn.secondary{background:linear-gradient(180deg,#39d98a,#28c57a)}
-  .btn.ghost{background:transparent;border:1px dashed #2a3152;color:var(--muted)}
-  .btn.warn{background:linear-gradient(180deg,#ffb86b,#ff9f43)}
-  .btn.danger{background:linear-gradient(180deg,#ff8b8b,#ff6b6b)}
-  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#0e1326;border:1px solid var(--border);font-size:.8rem;color:var(--muted)}
-  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .list li{background:#0e1326;border:1px solid var(--border);padding:10px 12px;border-radius:10px;margin:.35rem 0;display:flex;justify-content:space-between;gap:10px}
-  .right{opacity:.9}
-  .muted{color:var(--muted)}
-  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  .kpi .card{padding:12px}
-  .kpi .val{font-size:1.15rem;font-weight:700}
-  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-  .day{border:1px solid var(--border);background:#0e1326;border-radius:10px;padding:8px;min-height:88px}
-  .day .date{font-size:.8rem;color:var(--muted);margin-bottom:4px}
-  .tag{display:inline-block;font-size:.72rem;border:1px solid var(--border);border-radius:6px;padding:2px 6px;margin:2px 4px 0 0}
-  .tag.rev{border-color:#355; background:#0b1726}
-  .tag.new{border-color:#352; background:#0b1a12}
+  .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi .small{font-size:.78rem;color:var(--muted)}
+  .kpi .val{font-size:1.1rem;font-weight:800}
+
+  /* List & chips */
+  .list{list-style:none;padding:0;margin:0}
+  .list li{display:flex;justify-content:space-between;gap:10px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;margin:.35rem 0}
+  .right{display:flex;gap:6px;align-items:center}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--pill);border:1px solid var(--line);font-size:.78rem;color:var(--blue-700)}
   .tiny{font-size:.8rem}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-  .sep{height:1px;background:var(--border);margin:10px 0}
-  .tabs{display:flex;gap:8px;margin:8px 0 4px}
-  .tabs button{flex:0 0 auto}
-  .note{font-size:.8rem;color:var(--muted)}
-  .danger-text{color:var(--danger)}
-  /* 印刷(PDF)用 */
-  @media print{
-    header, .no-print{display:none !important}
-    main{max-width:100%;padding:0}
-    body{background:#fff;color:#000}
-    .card{border:none;background:#fff;padding:0}
-    .calendar{gap:2px}
-    .day{min-height:100px;border:1px solid #000;background:#fff;border-radius:0;padding:6px}
-    .day .date{color:#000}
-    .tag{border:1px solid #000}
-    .monthTitle{font-size:18pt;margin:6px 0}
+  .muted{color:var(--muted)}
+
+  /* Calendar */
+  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .day{border:1px solid var(--line);border-radius:12px;min-height:86px;padding:8px;background:#fff}
+  .date{font-size:.78rem;color:var(--muted);margin-bottom:4px}
+  .tag{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:2px 6px;margin:2px 4px 0 0}
+  .tag.rev{background:#e8f2ff;border-color:#cfe4ff}
+  .tag.new{background:#e9f7ef;border-color:#cfead8}
+
+  /* ===== Desktop (>= 980px): split UI ===== */
+  @media(min-width:980px){
+    main{padding:18px}
+    .grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:14px}
+    .kpi{grid-template-columns:repeat(4,1fr)}
+    .row-2{grid-template-columns:repeat(2,1fr);gap:10px}
+    .row-3{grid-template-columns:repeat(3,1fr);gap:10px}
+    .desktop-only{display:block}
   }
+  /* ===== Mobile bottom action bar ===== */
+  .fabbar{
+    position:sticky;bottom:0;z-index:6;background:linear-gradient(0deg,#ffffff,#ffffffe6);
+    border-top:1px solid var(--line);padding:8px 10px;display:flex;gap:8px
+  }
+  .fabbar .btn{flex:1 1 auto}
 </style>
 </head>
 <body>
 <header>
-  <h1>忘却曲線 学習プランナー（全部入り）</h1>
-  <div class="sub">試験日から逆算→今日のやること自動算出 / 自動日割り保存 / CSV / PDF / PWA</div>
+  <h1>学習プランナー</h1>
+  <div class="sub">青×白 / スマホ&PC最適化 / 教材→単元から自動計画（復習は自動算出）</div>
 </header>
 
-<main class="grid">
-  <!-- 左：設定＆科目 -->
-  <section class="card">
-    <h2>学習設定</h2>
-    <div class="row3">
-      <div>
-        <label>今日使える学習時間（分）</label>
-        <input id="minutesToday" type="number" min="0" step="5" value="120">
+<main>
+  <div class="grid">
+    <!-- ===== Left: 設定 & 科目/教材/単元 ===== -->
+    <section class="card">
+      <div class="section-title">学習設定</div>
+      <div class="row row-3">
+        <div>
+          <label>今日使える学習時間（分）</label>
+          <input id="minutesToday" type="number" min="0" step="5" value="120">
+        </div>
+        <div>
+          <label>先読み日数（連続表示）</label>
+          <input id="horizon" type="number" min="7" max="120" step="1" value="28">
+        </div>
+        <div>
+          <label>新規/復習の優先（新規重み 0.0〜1.0）</label>
+          <input id="newWeight" type="number" min="0" max="1" step="0.05" value="0.45">
+        </div>
       </div>
-      <div>
-        <label>想起しきい値 p（0.40〜0.85）</label>
-        <input id="recallThreshold" type="number" min="0.3" max="0.95" step="0.01" value="0.60">
-      </div>
-      <div>
-        <label>先読み日数（連続表示）</label>
-        <input id="horizon" type="number" min="7" max="120" step="1" value="30">
-      </div>
-    </div>
-    <div class="row3">
-      <div>
-        <label>標準1日の学習時間（分, 自動日割りの目安）</label>
-        <input id="stdDailyMinutes" type="number" min="10" step="5" value="120">
-      </div>
-      <div>
-        <label>新規/復習の優先（新規重み 0.0〜1.0）</label>
-        <input id="newWeight" type="number" min="0" max="1" step="0.05" value="0.45">
-      </div>
-      <div>
-        <label>月表示 用：対象月（YYYY-MM）</label>
-        <input id="monthPick" type="month">
-      </div>
-    </div>
+      <details style="margin-top:6px">
+        <summary class="tiny">アルゴリズム概要（クリックで表示）</summary>
+        <div class="tiny">
+          ・各単元は難易度ごとに忘却速度 <span class="pill">k</span> を内部設定（易0.10/普0.20/難0.35）。<br>
+          ・想起確率 <span class="pill">p(t)=exp(-k·t)</span> が 0.6 を割る直前を狙って復習日を自動配置（目安 0,1,3,7,14,30 を上限調整）。<br>
+          ・新規は「試験の近さ」重み <span class="pill">1/(days+1)^2</span> と今日の残時間から自動割当。<br>
+          ・単元は「教材ごとの並び順」で消化（後から並べ替え可）。
+        </div>
+      </details>
 
-    <div class="sep"></div>
-    <h2>科目を追加</h2>
-    <div class="row">
-      <div>
-        <label>科目名</label>
-        <input id="subjName" placeholder="世界史B・英語長文など">
+      <div class="section-title" style="margin-top:10px">科目を追加</div>
+      <div class="row row-2">
+        <div><label>科目名</label><input id="subjName" placeholder="世界史B など"></div>
+        <div><label>試験日</label><input id="examDate" type="date"></div>
       </div>
-      <div>
-        <label>試験日</label>
-        <input id="examDate" type="date">
+      <div class="row row-3" style="margin-top:6px">
+        <div><label>既定：1単元の目安時間（分）</label><input id="defaultUnitMins" type="number" min="1" value="15"></div>
+        <div><label>既定：難易度</label>
+          <select id="defaultDifficulty">
+            <option value="easy">易</option><option value="normal" selected>普</option><option value="hard">難</option>
+          </select></div>
+        <div style="display:flex;align-items:end"><button class="btn" id="addSubject">科目を追加</button></div>
       </div>
-    </div>
-    <div class="row3">
-      <div>
-        <label>総セクション数（章・単元・セット等）</label>
-        <input id="totalUnits" type="number" min="1" value="50">
-      </div>
-      <div>
-        <label>1セクションの目安時間（分）</label>
-        <input id="minsPerUnit" type="number" min="1" value="15">
-      </div>
-      <div>
-        <label>難易度</label>
-        <select id="difficulty">
-          <option value="easy">易（k=0.10）</option>
-          <option value="normal" selected>普（k=0.20）</option>
-          <option value="hard">難（k=0.35）</option>
-        </select>
-      </div>
-    </div>
-    <label>復習間隔（日,カンマ）既定：0,1,3,7,14,30</label>
-    <input id="customIntervals" placeholder="例: 0,1,2,4,8,16,32">
-    <div class="flex" style="margin-top:10px">
-      <button class="btn" id="addSubject">科目を追加</button>
-      <button class="btn ghost" id="clearAll">全消去（科目＋予定）</button>
-    </div>
 
-    <details style="margin-top:12px">
-      <summary>モデルと限界（超要約）</summary>
-      <div class="tiny">
-        想起確率を <span class="mono">p(t)=exp(-k·t)</span> で近似（易0.10/普0.20/難0.35）。復習は標準間隔（0/1/3/7/14/30日）を目安に、<b>しきい値 p</b>直前で入れる。新規の自動日割りは「試験の近さ（<span class="mono">1/(days+1)^2</span>）」と「日ごとの目安時間」で配分。  
-        注意：忘却曲線は集団平均の近似。個差・科目差が大きいので、しきい値や間隔は自分の実測で調整してほしい。
+      <div class="section-title" style="margin-top:10px">教材/単元の登録</div>
+      <div class="row">
+        <div>
+          <label>対象科目</label>
+          <select id="materialSubject"></select>
+        </div>
+        <div>
+          <label>教材名（参考書・問題集など）</label>
+          <input id="materialName" placeholder="例：ナビゲーター世界史① 古代~中世">
+        </div>
       </div>
-    </details>
-  </section>
+      <label>単元リスト（1行=1単元, 「タイトル | 分 | 難易度(easy/normal/hard)」形式。分と難易度は省略可）</label>
+      <textarea id="unitsBulk" placeholder="例:
+第1章 古代オリエント | 20 | normal
+第2章 古代ギリシア | 20
+第3章 アレクサンドロス | 15 | easy
+…"></textarea>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="addMaterial">教材と単元を追加</button>
+        <button class="btn ghost" id="clearAll">全データ削除</button>
+      </div>
 
-  <!-- 右：ダッシュボード -->
-  <section class="card">
-    <h2>ダッシュボード</h2>
-    <div class="kpi">
-      <div class="card"><div class="tiny muted">本日の残り時間</div><div class="val" id="kpiTime">—</div></div>
-      <div class="card"><div class="tiny muted">今日の復習件数</div><div class="val" id="kpiRev">—</div></div>
-      <div class="card"><div class="tiny muted">今日の新規件数</div><div class="val" id="kpiNew">—</div></div>
-      <div class="card"><div class="tiny muted">登録科目</div><div class="val" id="kpiSubjects">—</div></div>
-    </div>
-    <div class="sep"></div>
-    <div class="flex no-print">
-      <button class="btn secondary" id="makePlan">今日の計画を作成</button>
-      <button class="btn ghost" id="autoDistribute">新規の自動日割りを再計算</button>
-      <button class="btn ghost" id="exportJSON">JSONバックアップ</button>
-      <input type="file" id="importJSONInput" style="display:none">
-      <button class="btn ghost" id="importJSON">JSON復元</button>
-    </div>
-
-    <div class="flex no-print" style="margin-top:6px">
-      <button class="btn warn" id="exportSubjectsCSV">科目CSV出力</button>
-      <button class="btn warn" id="exportScheduleCSV">予定CSV出力</button>
-      <input type="file" id="importSubjectsCSVInput" style="display:none" accept=".csv,text/csv">
-      <button class="btn ghost" id="importSubjectsCSV">科目CSV取込</button>
-      <input type="file" id="importScheduleCSVInput" style="display:none" accept=".csv,text/csv">
-      <button class="btn ghost" id="importScheduleCSV">予定CSV取込</button>
-      <button class="btn" id="printPDF">PDF出力（印刷）</button>
-    </div>
-
-    <div class="note" style="margin-top:8px">完了チェックで進捗を反映し、その件数ぶんの復習が将来日に自動予約されます。新規の自動日割りは「再計算」ボタンでいつでも組み直し可。</div>
-    <ul class="list" id="todayList"></ul>
-
-    <div id="subjectsWrap">
-      <h3>科目一覧</h3>
+      <div class="section-title" style="margin-top:10px">登録状況</div>
       <ul class="list" id="subjectsList"></ul>
-    </div>
-  </section>
+    </section>
 
-  <!-- 下段：カレンダー -->
-  <section class="card" style="grid-column:1/-1">
-    <div class="tabs no-print">
-      <button class="btn ghost" id="tabContinuous">連続表示</button>
-      <button class="btn ghost" id="tabMonthly">月表示</button>
-    </div>
-    <div id="viewContinuous">
-      <h2>先読み（連続 n 日）</h2>
-      <div class="calendar" id="calendarContinuous"></div>
-    </div>
-    <div id="viewMonthly" style="display:none">
-      <h2 class="monthTitle">月間カレンダー</h2>
-      <div class="calendar" id="calendarMonthly"></div>
-    </div>
-  </section>
+    <!-- ===== Right: ダッシュボード & カレンダー ===== -->
+    <section class="card">
+      <div class="section-title">ダッシュボード</div>
+      <div class="kpi">
+        <div class="card" style="border:1px solid var(--line);box-shadow:none">
+          <div class="small">本日の残時間</div><div class="val" id="kpiTime">—</div>
+        </div>
+        <div class="card" style="border:1px solid var(--line);box-shadow:none">
+          <div class="small">今日の復習（単元）</div><div class="val" id="kpiRev">—</div>
+        </div>
+        <div class="card" style="border:1px solid var(--line);box-shadow:none">
+          <div class="small">今日の新規（単元）</div><div class="val" id="kpiNew">—</div>
+        </div>
+        <div class="card desktop-only" style="border:1px solid var(--line);box-shadow:none">
+          <div class="small">登録科目</div><div class="val" id="kpiSubjects">—</div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn ok" id="makePlan">今日の計画を作成</button>
+        <button class="btn ghost" id="reflowNew">新規の将来日割りを再計算</button>
+      </div>
+      <div class="tiny muted" style="margin:6px 2px">完了チェックで復習予定が自動追加・更新されます（復習日の計算は自動）。</div>
+
+      <ul class="list" id="todayList"></ul>
+
+      <div class="section-title" style="margin-top:10px">先読み（連続表示）</div>
+      <div class="calendar" id="calendar"></div>
+    </section>
+  </div>
+
+  <!-- Mobile action bar -->
+  <div class="fabbar">
+    <button class="btn ok" id="fabMakePlan">今日の計画</button>
+    <button class="btn" id="fabReflow">新規日割り</button>
+  </div>
 </main>
 
 <script>
@@ -215,497 +193,367 @@
   const $$ = s=>document.querySelectorAll(s);
   const todayISO = iso(new Date());
 
-  // state
-  const state = load() || { subjects:[], schedule:{} };
+  // ===== State =====
+  const state = load() || { subjects:[], schedule:{}, units:{} };
+  // subjects: [{id,name,examDate,defaultMins,defaultDiff, materials:[{id,name,unitIds:[...]}]}]
+  // units: { unitId: {id,title,mins,diff,subjectId,materialId, order, learned:false, lastDone:null } }
+  // schedule: { 'YYYY-MM-DD': { unitId: {review: n(=0/1), new:n(=0/1)} } }
 
-  // --- Utils ---
+  // ===== Utils =====
   function iso(d){ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); }
   function addDays(isoStr, n){ const d=new Date(isoStr); d.setDate(d.getDate()+n); return iso(d); }
   function daysBetween(aISO,bISO){ const a=new Date(aISO), b=new Date(bISO); return Math.ceil((b-a)/86400000); }
   function daysUntil(dateISO){ return Math.max(0, daysBetween(todayISO, dateISO)); }
-  function save(){ localStorage.setItem("fc_planner_full", JSON.stringify(state)); }
-  function load(){ try{ return JSON.parse(localStorage.getItem("fc_planner_full")); }catch(e){ return null; } }
-  function parseIntervals(str){ if(!str) return [0,1,3,7,14,30]; return str.split(",").map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n)&&n>=0).slice(0,20).sort((a,b)=>a-b); }
+  function save(){ localStorage.setItem("planner_bluewhite_units", JSON.stringify(state)); }
+  function load(){ try{ return JSON.parse(localStorage.getItem("planner_bluewhite_units")); }catch(e){ return null; } }
   function kFromDifficulty(d){ if(d==='easy') return 0.10; if(d==='hard') return 0.35; return 0.20; }
-  function weightByUrgency(days){ return 1/Math.pow(days+1,2); } // 近いほど重い
-  function getSchedule(dateISO){ state.schedule[dateISO] = state.schedule[dateISO] || {}; return state.schedule[dateISO]; }
-  function ensureSubjSlot(obj, subjId){ obj[subjId] = obj[subjId] || {review:0, new:0}; return obj[subjId]; }
-  function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+  function tCritical(k, threshold=0.60){ return Math.max(0, Math.round(-Math.log(threshold)/k)); }
+  function ensureDay(dateISO){ state.schedule[dateISO] = state.schedule[dateISO] || {}; return state.schedule[dateISO]; }
+  function ensureUnitSlot(day, unitId){ day[unitId] = day[unitId] || {review:0,new:0}; return day[unitId]; }
+  function weightByUrgency(days){ return 1/Math.pow(days+1,2); }
 
-  // --- Render subjects ---
-  function renderSubjects(){
+  // ===== Subject & Material Rendering =====
+  function renderSubjectSelect(){
+    const sel=$("#materialSubject");
+    sel.innerHTML="";
+    state.subjects
+      .sort((a,b)=> new Date(a.examDate)-new Date(b.examDate))
+      .forEach(s=>{
+        const opt=document.createElement("option");
+        opt.value=s.id; opt.textContent=`${s.name}（試験 ${s.examDate}）`;
+        sel.appendChild(opt);
+      });
+  }
+  function renderSubjectsList(){
     const ul=$("#subjectsList"); ul.innerHTML="";
-    state.subjects.sort((a,b)=> new Date(a.examDate) - new Date(b.examDate));
-    state.subjects.forEach(s=>{
-      const remain = s.totalUnits - (s.progress||0);
+    state.subjects.sort((a,b)=> new Date(a.examDate)-new Date(b.examDate));
+    state.subjects.forEach(subj=>{
       const li=document.createElement("li");
-      li.innerHTML=`
+      const totalUnits = subj.materials.reduce((sum,m)=> sum + m.unitIds.length, 0);
+      const doneUnits = subj.materials.reduce((sum,m)=> sum + m.unitIds.filter(id=> state.units[id]?.learned).length, 0);
+      li.innerHTML = `
         <div>
-          <div><b>${s.name}</b> <span class="pill">試験 ${s.examDate}</span> <span class="pill">難:${s.difficulty}</span></div>
-          <div class="muted tiny">総${s.totalUnits} / 学習済 ${s.progress||0} / 残り ${remain}・${s.minsPerUnit}分/単位</div>
-          <div class="tiny">復習間隔: ${(s.intervals||[]).join(", ")}</div>
+          <div><b>${subj.name}</b> <span class="pill">試験 ${subj.examDate}</span></div>
+          <div class="tiny muted">教材 ${subj.materials.length} / 単元 ${doneUnits}/${totalUnits}</div>
         </div>
-        <div class="right flex">
-          <button class="btn ghost" data-act="bump" data-id="${s.id}">進捗+1</button>
-          <button class="btn ghost" data-act="edit" data-id="${s.id}">編集</button>
-          <button class="btn danger" data-act="del" data-id="${s.id}">削除</button>
+        <div class="right">
+          <button class="btn ghost tinyBtn" data-act="view" data-id="${subj.id}">詳細</button>
+          <button class="btn danger tinyBtn" data-act="del" data-id="${subj.id}">削除</button>
         </div>`;
       ul.appendChild(li);
+
+      // 展開（詳細）
+      const container=document.createElement("div");
+      container.style.margin="6px 0 10px 0";
+      container.style.display="none";
+      container.className="tiny";
+      container.innerHTML = renderSubjectDetail(subj);
+      ul.appendChild(container);
+
+      ul.addEventListener("click",(e)=>{
+        const btn=e.target.closest("button"); if(!btn) return;
+        if(btn.dataset.id!==subj.id) return;
+        if(btn.dataset.act==="view"){
+          container.style.display = (container.style.display==="none")? "block":"none";
+        }else if(btn.dataset.act==="del"){
+          if(confirm("科目を削除しますか？（教材・単元・予定も削除）")){
+            // delete schedule entries for units under this subject
+            const unitIds = subj.materials.flatMap(m=>m.unitIds);
+            for(const date in state.schedule){
+              for(const uid in state.schedule[date]){
+                if(unitIds.includes(uid)) delete state.schedule[date][uid];
+              }
+            }
+            // delete units
+            unitIds.forEach(uid=> delete state.units[uid]);
+            // remove subject
+            state.subjects = state.subjects.filter(s=>s.id!==subj.id);
+            save(); renderSubjectSelect(); renderSubjectsList(); renderCalendar();
+          }
+        }
+      }, {once:false});
     });
     $("#kpiSubjects").textContent = state.subjects.length;
   }
+  function renderSubjectDetail(subj){
+    let html="";
+    subj.materials.forEach(mat=>{
+      html += `<div class="card" style="padding:8px;border:1px dashed var(--line);box-shadow:none">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+          <div><b>教材：</b>${mat.name} <span class="pill">単元 ${mat.unitIds.length}</span></div>
+          <div class="right tiny">
+            <button class="btn ghost tinyBtn" data-mact="reorder" data-mid="${mat.id}" data-sid="${subj.id}">並替</button>
+            <button class="btn danger tinyBtn" data-mact="delmat" data-mid="${mat.id}" data-sid="${subj.id}">削除</button>
+          </div>
+        </div>
+        <ol style="margin:.4rem 0 .2rem .9rem;padding:0;">${
+          mat.unitIds.map(uid=>{
+            const u=state.units[uid];
+            const mark = u.learned ? "✅" : "⬜";
+            return `<li style="margin:.2rem 0">
+              ${mark} ${u.title}
+              <span class="pill">${u.mins}分</span>
+              <span class="pill">難:${u.diff}</span>
+              <button class="btn ghost tinyBtn" data-uact="toggle" data-uid="${u.id}">完了切替</button>
+              <button class="btn ghost tinyBtn" data-uact="up" data-uid="${u.id}" data-mid="${mat.id}" data-sid="${subj.id}">↑</button>
+              <button class="btn ghost tinyBtn" data-uact="down" data-uid="${u.id}" data-mid="${mat.id}" data-sid="${subj.id}">↓</button>
+            </li>`;
+          }).join("")
+        }</ol>
+      </div>`;
+    });
+    // イベント委譲（並替/削除/完了）
+    setTimeout(()=>{
+      document.querySelectorAll('[data-mact="delmat"]').forEach(btn=>{
+        btn.onclick = ()=>{
+          const sid=btn.dataset.sid, mid=btn.dataset.mid;
+          const s=state.subjects.find(x=>x.id===sid); if(!s) return;
+          const m=s.materials.find(x=>x.id===mid); if(!m) return;
+          if(!confirm("教材を削除しますか？（教材内の単元とその予定も削除）")) return;
+          m.unitIds.forEach(uid=>{
+            // remove schedule for unit
+            for(const date in state.schedule){ if(state.schedule[date][uid]) delete state.schedule[date][uid]; }
+            delete state.units[uid];
+          });
+          s.materials = s.materials.filter(x=>x.id!==mid);
+          save(); renderSubjectsList(); renderCalendar();
+        };
+      });
+      document.querySelectorAll('[data-mact="reorder"]').forEach(btn=>{
+        btn.onclick = ()=> alert("並び替え：各単元の↑/↓で調整してください。");
+      });
+      document.querySelectorAll('[data-uact]').forEach(btn=>{
+        btn.onclick = ()=>{
+          const act=btn.dataset.uact, uid=btn.dataset.uid, mid=btn.dataset.mid, sid=btn.dataset.sid;
+          const u=state.units[uid]; if(!u) return;
+          if(act==="toggle"){
+            u.learned=!u.learned; u.lastDone = u.learned ? todayISO : null;
+            if(u.learned) scheduleReviewsForUnit(u); // 既学習に切替時、復習予約
+            save(); renderSubjectsList(); renderCalendar();
+          }else if((act==="up"||act==="down") && mid && sid){
+            const s=state.subjects.find(x=>x.id===sid); const m=s?.materials.find(x=>x.id===mid);
+            if(!s||!m) return;
+            const idx = m.unitIds.indexOf(uid);
+            const j = (act==="up")? idx-1 : idx+1;
+            if(j<0||j>=m.unitIds.length) return;
+            const tmp=m.unitIds[idx]; m.unitIds[idx]=m.unitIds[j]; m.unitIds[j]=tmp;
+            save(); renderSubjectsList();
+          }
+        };
+      });
+    },0);
+    return html;
+  }
 
-  // --- Add subject ---
+  // ===== Add Subject / Material / Units =====
   $("#addSubject").addEventListener("click", ()=>{
     const name=$("#subjName").value.trim();
     const examDate=$("#examDate").value;
-    const totalUnits=parseInt($("#totalUnits").value,10);
-    const minsPerUnit=parseInt($("#minsPerUnit").value,10);
-    const difficulty=$("#difficulty").value;
-    if(!name || !examDate || !totalUnits || !minsPerUnit){ alert("未入力の項目があります"); return; }
-    const intervals=parseIntervals($("#customIntervals").value);
-    const subj = { id:crypto.randomUUID(), name, examDate, totalUnits, minsPerUnit, difficulty, intervals, progress:0 };
+    const defaultMins=parseInt($("#defaultUnitMins").value,10)||15;
+    const defaultDiff=$("#defaultDifficulty").value;
+    if(!name || !examDate){ alert("科目名と試験日を入力してください"); return; }
+    const subj={ id:crypto.randomUUID(), name, examDate, defaultMins, defaultDiff, materials:[] };
     state.subjects.push(subj); save();
-    $("#subjName").value=""; $("#examDate").value=""; $("#customIntervals").value="";
-    renderSubjects(); renderCalendars();
+    $("#subjName").value=""; $("#examDate").value="";
+    renderSubjectSelect(); renderSubjectsList(); renderCalendar();
   });
 
-  // --- Subject actions ---
-  $("#subjectsList").addEventListener("click",(e)=>{
-    const btn=e.target.closest("button"); if(!btn) return;
-    const id=btn.dataset.id; const s=state.subjects.find(x=>x.id===id); if(!s) return;
-    if(btn.dataset.act==="del"){
-      if(confirm("この科目を削除しますか？")){ state.subjects=state.subjects.filter(x=>x.id!==id); save(); renderSubjects(); renderCalendars(); }
-    }else if(btn.dataset.act==="bump"){
-      s.progress=Math.min(s.totalUnits,(s.progress||0)+1); save(); renderSubjects();
-    }else if(btn.dataset.act==="edit"){
-      const nv=prompt("総セク数,1セク時間(分),難易度(easy/normal/hard),復習間隔CSV", `${s.totalUnits},${s.minsPerUnit},${s.difficulty},${s.intervals.join(",")}`);
-      if(nv){
-        const [tot,mins,diff,ints] = nv.split(",");
-        s.totalUnits=parseInt(tot||s.totalUnits,10);
-        s.minsPerUnit=parseInt(mins||s.minsPerUnit,10);
-        s.difficulty=(diff||s.difficulty).trim();
-        s.intervals = parseIntervals(ints||s.intervals.join(","));
-        save(); renderSubjects(); renderCalendars();
-      }
-    }
+  $("#addMaterial").addEventListener("click", ()=>{
+    const sid=$("#materialSubject").value; if(!sid){ alert("先に科目を作成してください"); return; }
+    const subj=state.subjects.find(s=>s.id===sid);
+    const mname=$("#materialName").value.trim(); if(!mname){ alert("教材名を入力してください"); return; }
+    const lines=$("#unitsBulk").value.split("\n").map(s=>s.trim()).filter(s=>s);
+    if(lines.length===0){ alert("単元を1行以上入力してください"); return; }
+    const mat={ id:crypto.randomUUID(), name:mname, unitIds:[] };
+    lines.forEach((line, i)=>{
+      // "タイトル | 分 | 難易度"
+      const parts=line.split("|").map(s=>s.trim());
+      const title=parts[0]||`単元${i+1}`;
+      const mins= parseInt(parts[1]||subj.defaultMins,10);
+      const diff= (parts[2]||subj.defaultDiff).toLowerCase();
+      const uid=crypto.randomUUID();
+      state.units[uid]={ id:uid, title, mins, diff, subjectId:subj.id, materialId:mat.id, order:i, learned:false, lastDone:null };
+      mat.unitIds.push(uid);
+    });
+    subj.materials.push(mat);
+    save();
+    $("#materialName").value=""; $("#unitsBulk").value="";
+    renderSubjectsList(); renderCalendar();
   });
 
-  // --- Today plan ---
+  $("#clearAll").addEventListener("click", ()=>{
+    if(!confirm("全データ（科目/教材/単元/予定）を削除しますか？")) return;
+    localStorage.removeItem("planner_bluewhite_units");
+    location.reload();
+  });
+
+  // ===== Plan: build today's tasks =====
   function makeTodayPlan(){
     const minutesToday=parseInt($("#minutesToday").value,10)||0;
     $("#kpiTime").textContent = minutesToday+"分";
-    const threshold=parseFloat($("#recallThreshold").value)||0.6;
 
-    // 1) きょうの復習タスク
-    const today=getSchedule(todayISO);
-    const reviewItems=[];
-    for(const subjId in today){
-      const n = today[subjId].review||0;
-      if(n>0){
-        const subj = state.subjects.find(s=>s.id===subjId);
-        if(subj) reviewItems.push({subj, count:n});
-      }
-    }
-    let revMinutes = reviewItems.reduce((sum,r)=> sum + r.count * Math.max(3, Math.round(r.subj.minsPerUnit*0.5)), 0);
+    // 1) 今日の復習（unitベース）
+    const today=ensureDay(todayISO);
+    const reviewUnits=Object.keys(today)
+      .filter(uid=> today[uid].review>0)
+      .map(uid=> state.units[uid])
+      .filter(Boolean);
 
-    // 2) 残りで新規（きょうに限り暫定で見積）
+    const revMinutes = reviewUnits
+      .reduce((sum,u)=> sum + Math.max(3, Math.round(u.mins*0.6)), 0);
+
+    // 2) 残り時間で新規
     let timeLeft = Math.max(0, minutesToday - revMinutes);
-    const candidates = state.subjects.map(s=>{
-      const left = s.totalUnits - (s.progress||0);
-      return {subj:s, left, days:daysUntil(s.examDate), w: left>0 ? weightByUrgency(daysUntil(s.examDate)) : 0 };
-    }).filter(x=>x.left>0);
-    const W = candidates.reduce((a,c)=>a+c.w,0) || 1;
 
-    const newItems=[];
+    // 候補：未学習の先頭単元（教材の順）を科目ごとに引き当て
+    const candidates=[];
+    state.subjects.forEach(subj=>{
+      const leftDays = daysUntil(subj.examDate);
+      const w = weightByUrgency(leftDays);
+      // その科目の「次にやるべき単元」を順番に拾う（余裕があれば複数）
+      const orderedUnits = subj.materials.flatMap(m=> m.unitIds.map(uid=> state.units[uid]))
+        .filter(u=>u && !u.learned)
+        .sort((a,b)=> a.order-b.order);
+      if(orderedUnits.length>0) candidates.push({subj, w, units:orderedUnits});
+    });
+    const W = candidates.reduce((a,c)=>a+c.w,0)||1;
+
+    const newPick=[];
     if(timeLeft>0){
       candidates.forEach(c=>{
-        const share = timeLeft * (c.w/W);
-        const canDo = Math.min(c.left, Math.floor( share / c.subj.minsPerUnit ));
-        if(canDo>0) newItems.push({subj:c.subj, count:canDo});
+        const shareMin = timeLeft * (c.w/W) * (parseFloat($("#newWeight").value)||0.45);
+        let used=0;
+        for(const u of c.units){
+          if(used + u.mins <= shareMin + 0.01){ // 少しゆとり
+            newPick.push(u); used+=u.mins;
+          }else{ break; }
+        }
       });
     }
 
-    // 描画
+    // UI描画
     const ul=$("#todayList"); ul.innerHTML="";
     let totalRev=0,totalNew=0;
-    reviewItems.forEach(r=>{
-      totalRev+=r.count;
+    reviewUnits.forEach(u=>{
+      totalRev++;
       const li=document.createElement("li");
       li.innerHTML = `
-        <div><b>復習</b>：${r.subj.name} <span class="pill">×${r.count}</span></div>
-        <div class="right">
-          <label class="tiny muted"><input type="checkbox" data-type="rev" data-id="${r.subj.id}" data-count="${r.count}"> 完了</label>
+        <div><b>復習</b>：${u.title} <span class="pill">${u.mins}分</span> <span class="pill">難:${u.diff}</span></div>
+        <div class="right tiny">
+          <label class="muted"><input type="checkbox" data-type="rev" data-uid="${u.id}"> 完了</label>
         </div>`;
       ul.appendChild(li);
     });
-    newItems.forEach(n=>{
-      totalNew+=n.count;
+    newPick.forEach(u=>{
+      totalNew++;
       const li=document.createElement("li");
       li.innerHTML = `
-        <div><b>新規（今日）</b>：${n.subj.name} <span class="pill">×${n.count}</span> <span class="muted tiny">(${n.subj.minsPerUnit}分/単位)</span></div>
-        <div class="right">
-          <label class="tiny muted"><input type="checkbox" data-type="new" data-id="${n.subj.id}" data-count="${n.count}"> 完了</label>
+        <div><b>新規</b>：${u.title} <span class="pill">${u.mins}分</span> <span class="pill">難:${u.diff}</span></div>
+        <div class="right tiny">
+          <label class="muted"><input type="checkbox" data-type="new" data-uid="${u.id}"> 完了</label>
         </div>`;
       ul.appendChild(li);
     });
     $("#kpiRev").textContent = totalRev;
     $("#kpiNew").textContent = totalNew;
 
-    // 完了チェック：進捗反映＆将来復習を積み上げ
+    // 完了 → 状態更新 & 復習予約
     ul.addEventListener("change",(e)=>{
       const cb=e.target; if(cb.tagName!=="INPUT") return;
-      if(cb.checked){
-        const type=cb.dataset.type, subjId=cb.dataset.id, cnt=parseInt(cb.dataset.count,10);
-        const subj = state.subjects.find(s=>s.id===subjId); if(!subj) return;
-        if(type==="new"){
-          subj.progress = Math.min(subj.totalUnits, (subj.progress||0)+cnt);
-          scheduleReviews(subj, cnt, threshold);
-        }else if(type==="rev"){
-          const day=getSchedule(todayISO); ensureSubjSlot(day, subjId); day[subjId].review = Math.max(0, day[subjId].review - cnt);
-        }
-        save(); renderSubjects(); renderCalendars();
+      if(!cb.checked) return;
+      const type=cb.dataset.type, uid=cb.dataset.uid;
+      const u=state.units[uid]; if(!u) return;
+
+      if(type==="new"){
+        u.learned = true; u.lastDone = todayISO;
+        scheduleReviewsForUnit(u);
+      }else if(type==="rev"){
+        const day=ensureDay(todayISO); if(day[uid]) day[uid].review = 0;
+        // 間違えた/思い出し悪い → 追加で短期レビュー（翌日）を1件入れると安定
+        const next=addDays(todayISO,1); const d2=ensureDay(next); ensureUnitSlot(d2, uid).review = 1;
       }
+      save(); renderSubjectsList(); renderCalendar();
     }, {once:false});
   }
 
-  function scheduleReviews(subj, count, threshold){
-    const baseInts = (subj.intervals && subj.intervals.length)? subj.intervals : [0,1,3,7,14,30];
-    const k = kFromDifficulty(subj.difficulty);
-    const tCritical = Math.max(0, Math.round(-Math.log(threshold)/k)); // p>=threshold の限界
-    baseInts.forEach(d=>{
-      let dd = d;
-      if(d>0 && d>tCritical) dd = tCritical; // 行き過ぎを戻す
-      const date = addDays(todayISO, dd);
-      const day = getSchedule(date);
-      ensureSubjSlot(day, subj.id);
-      day[subj.id].review += count;
+  // ===== Auto review schedule per unit (no user input) =====
+  function scheduleReviewsForUnit(u){
+    const k = kFromDifficulty(u.diff);
+    const tc = tCritical(k, 0.60);
+    // 基本候補（最大でも tCritical を超えない）
+    const base = [0,1,3,7,14,30,45,60].filter(d=> d<=Math.max(1,tc));
+    if(base.length===0) base.push(0,1); // 万一短い場合
+    base.forEach(d=>{
+      const date = addDays(todayISO, d);
+      const day = ensureDay(date);
+      ensureUnitSlot(day, u.id).review = 1;
     });
   }
 
-  // --- 自動日割り（新規を将来日に保存） ---
-  function autoDistributeNew(){
-    // 既存の「new」割当を一旦クリア（reviewは触らない）
+  // ===== Reflow future NEW tasks (optional) =====
+  function reflowNew(){
+    // いったん全ての new=0 に
     for(const date in state.schedule){
-      for(const sid in state.schedule[date]){
-        state.schedule[date][sid].new = 0;
+      for(const uid in state.schedule[date]){
+        state.schedule[date][uid].new = 0;
       }
     }
-    const stdDailyMinutes = parseInt($("#stdDailyMinutes").value,10)||120;
-    const newWeight = clamp(parseFloat($("#newWeight").value)||0.45,0,1);
+    // まだ学習していない単元を、試験日までに均しつつ「近い試験ほど多め」に配分
+    const horizon = Math.max(1, parseInt($("#horizon").value,10)||28);
+    const newWeight = parseFloat($("#newWeight").value)||0.45;
 
-    // 各日ごとの新規キャパ（ざっくり）：全科目の minsPerUnit と newWeight から、
-    // 1日に置ける新規「単位数」を見積→重みで配分。
-    // 科目ごとに：残数、試験までの日数、重み w=1/(days+1)^2
-    const today = todayISO;
-    state.subjects.forEach(s=>{
-      const left = Math.max(0, s.totalUnits - (s.progress||0));
-      if(left<=0) return;
-      const until = Math.max(1, daysBetween(today, s.examDate)); // 今日含めず
-      // 一旦均し：各日 q 個を置く
-      // ただし「近い試験ほど多め」にしたいので、日毎に w(day)=1/(d_to_exam+1)^2 をかける
-      // 目標総新規時間 = left * minsPerUnit
-      const totalMinNeeded = left * s.minsPerUnit;
-      // 各日キャパ：stdDailyMinutes * newWeight をベースに（全科目で取り合いだが、ここでは単科で近似）
-      const perDayMin = stdDailyMinutes * newWeight;
-      // 必要日数目安
-      const approxDaysNeeded = Math.max(1, Math.ceil(totalMinNeeded / Math.max(1, perDayMin)));
-      // 配分対象期間：min(試験まで, approxDaysNeeded*1.5余裕)
-      const span = Math.min(until, Math.max(approxDaysNeeded, Math.floor(until*0.9)));
-      // 重み総和
-      let W=0; const ws=[];
+    state.subjects.forEach(subj=>{
+      const until = Math.max(1, daysBetween(todayISO, subj.examDate));
+      const span = Math.min(until, horizon);
+      const wList=[]; let W=0;
       for(let i=0;i<span;i++){
-        const date = addDays(today, i+1); // 明日から
-        const dleft = daysBetween(date, s.examDate);
+        const date = addDays(todayISO, i+1);
+        const dleft = daysBetween(date, subj.examDate);
         const w = weightByUrgency(Math.max(0,dleft));
-        ws.push({date,w}); W+=w;
+        wList.push({date,w}); W+=w;
       }
-      // 1日あたり割当（単位換算）
-      let unitsLeft = left;
-      ws.forEach(({date,w}, idx)=>{
-        if(unitsLeft<=0) return;
-        const shareMin = (totalMinNeeded * (w/W));
-        const units = Math.max(0, Math.floor( shareMin / s.minsPerUnit ));
-        if(idx===ws.length-1){ // 端数は最終日に寄せる
-          // 残り全部
-          const u = Math.min(unitsLeft, Math.max(units, 0));
-          if(u>0){ const day=getSchedule(date); ensureSubjSlot(day, s.id); day[s.id].new += u; unitsLeft -= u; }
-        }else{
-          const u = Math.min(unitsLeft, units);
-          if(u>0){ const day=getSchedule(date); ensureSubjSlot(day, s.id); day[s.id].new += u; unitsLeft -= u; }
-        }
+      const queue = subj.materials.flatMap(m=> m.unitIds.map(id=> state.units[id]))
+        .filter(u=>u && !u.learned)
+        .sort((a,b)=> a.order-b.order);
+
+      queue.forEach((u, idx)=>{
+        const bucket = wList[Math.floor((idx / Math.max(1,queue.length)) * wList.length)] || wList[wList.length-1];
+        const day = ensureDay(bucket.date);
+        ensureUnitSlot(day, u.id).new = 1;
       });
-      // もし全く置けなかったら、試験前日に1だけ入れる
-      if(left>0){
-        const lastDate = addDays(s.examDate,-1);
-        const day=getSchedule(lastDate); ensureSubjSlot(day, s.id); day[s.id].new += Math.min(left,1);
-      }
     });
-    save(); renderCalendars();
-    alert("新規の自動日割りを保存しました（復習はそのまま）。");
+    save(); renderCalendar();
+    alert("新規の将来日割りを再計算しました。");
   }
 
-  // --- 連続表示カレンダー ---
-  function renderCalendarContinuous(){
-    const cal=$("#calendarContinuous"); cal.innerHTML="";
-    const horizon = parseInt($("#horizon").value,10)||30;
+  // ===== Calendar =====
+  function renderCalendar(){
+    const cal=$("#calendar"); cal.innerHTML="";
+    const horizon = Math.max(7, parseInt($("#horizon").value,10)||28);
     for(let i=0;i<horizon;i++){
       const date = addDays(todayISO, i);
       const day = state.schedule[date] || {};
-      const div = document.createElement("div");
-      div.className="day";
+      const div=document.createElement("div"); div.className="day";
       const d = new Date(date);
       const wd = ["日","月","火","水","木","金","土"][d.getDay()];
       div.innerHTML = `<div class="date">${date}（${wd}）</div>`;
-      for(const subjId in day){
-        const s = state.subjects.find(x=>x.id===subjId);
-        if(!s) continue;
-        const r = day[subjId].review||0, n = day[subjId].new||0;
-        if(r>0) { const tag=document.createElement("div"); tag.className="tag rev"; tag.textContent=`復:${s.name} ×${r}`; div.appendChild(tag); }
-        if(n>0) { const tag=document.createElement("div"); tag.className="tag new"; tag.textContent=`新:${s.name} ×${n}`; div.appendChild(tag); }
+      for(const uid in day){
+        const u=state.units[uid]; if(!u) continue;
+        if(day[uid].review>0){ const t=document.createElement("div"); t.className="tag rev"; t.textContent=`復:${u.title}`; div.appendChild(t);}
+        if(day[uid].new>0){ const t=document.createElement("div"); t.className="tag new"; t.textContent=`新:${u.title}`; div.appendChild(t);}
       }
       cal.appendChild(div);
     }
   }
 
-  // --- 月表示カレンダー（印刷/PDF向け） ---
-  function renderCalendarMonthly(){
-    const monthStr = $("#monthPick").value || (new Date().toISOString().slice(0,7)); // YYYY-MM
-    const [Y,M] = monthStr.split("-").map(x=>parseInt(x,10));
-    const first = new Date(Y, M-1, 1);
-    const startWeekday = first.getDay(); // 0(日)〜6
-    const lastDate = new Date(Y, M, 0).getDate();
-    const cal=$("#calendarMonthly"); cal.innerHTML="";
-    $("#viewMonthly .monthTitle").textContent = `${Y}年${M}月 カレンダー`;
-
-    // 前の月の穴埋め
-    for(let i=0;i<startWeekday;i++){
-      const div=document.createElement("div"); div.className="day"; div.innerHTML=`<div class="date muted"> </div>`; cal.appendChild(div);
-    }
-    for(let dayNum=1; dayNum<=lastDate; dayNum++){
-      const dateISO = iso(new Date(Y, M-1, dayNum));
-      const day = state.schedule[dateISO] || {};
-      const div=document.createElement("div"); div.className="day";
-      const wd = ["日","月","火","水","木","金","土"][new Date(Y, M-1, dayNum).getDay()];
-      div.innerHTML = `<div class="date">${dateISO}（${wd}）</div>`;
-      for(const subjId in day){
-        const s = state.subjects.find(x=>x.id===subjId);
-        if(!s) continue;
-        const r = day[subjId].review||0, n = day[subjId].new||0;
-        if(r>0) { const tag=document.createElement("div"); tag.className="tag rev"; tag.textContent=`復:${s.name} ×${r}`; div.appendChild(tag); }
-        if(n>0) { const tag=document.createElement("div"); tag.className="tag new"; tag.textContent=`新:${s.name} ×${n}`; div.appendChild(tag); }
-      }
-      cal.appendChild(div);
-    }
-    // 末尾の穴埋め（行揃え）
-    const cells = cal.children.length % 7;
-    if(cells!==0){
-      for(let i=0;i<7-cells;i++){
-        const div=document.createElement("div"); div.className="day"; div.innerHTML=`<div class="date muted"> </div>`; cal.appendChild(div);
-      }
-    }
-  }
-
-  function renderCalendars(){ renderCalendarContinuous(); renderCalendarMonthly(); }
-
-  // --- CSV 出力/入力 ---
-  function exportCSV(filename, rows){
-    const csv = rows.map(r=>r.map(x=> {
-      const s = (x===null||x===undefined) ? "" : String(x);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
-    }).join(",")).join("\n");
-    const blob=new Blob([csv],{type:"text/csv"});
-    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
-  }
-  function parseCSV(text){
-    // 簡易CSVパーサ（ダブルクォート対応）
-    const rows=[]; let i=0, field="", row=[], inQ=false;
-    while(i<text.length){
-      const c=text[i];
-      if(inQ){
-        if(c==='"' && text[i+1]==='"'){ field+='"'; i+=2; continue; }
-        if(c==='"'){ inQ=false; i++; continue; }
-        field+=c; i++; continue;
-      }else{
-        if(c==='"'){ inQ=true; i++; continue; }
-        if(c===','){ row.push(field); field=""; i++; continue; }
-        if(c==='\n' || c==='\r'){ if(field!==""||row.length>0){ row.push(field); rows.push(row); row=[]; field=""; } i++; continue; }
-        field+=c; i++; continue;
-      }
-    }
-    if(field!==""||row.length>0){ row.push(field); rows.push(row); }
-    return rows;
-  }
-
-  // subjects.csv
-  $("#exportSubjectsCSV").addEventListener("click", ()=>{
-    const header = ["id","name","examDate","totalUnits","minsPerUnit","difficulty","intervals","progress"];
-    const rows=[header];
-    state.subjects.forEach(s=>{
-      rows.push([s.id,s.name,s.examDate,s.totalUnits,s.minsPerUnit,s.difficulty,(s.intervals||[]).join(" "),s.progress||0]);
-    });
-    exportCSV("subjects.csv", rows);
-  });
-  $("#importSubjectsCSV").addEventListener("click", ()=> $("#importSubjectsCSVInput").click());
-  $("#importSubjectsCSVInput").addEventListener("change",(e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    const rd=new FileReader(); rd.onload=ev=>{
-      try{
-        const rows=parseCSV(ev.target.result);
-        const [header,...data]=rows;
-        const idx = (name)=> header.indexOf(name);
-        const ids = new Set(state.subjects.map(s=>s.id));
-        data.forEach(r=>{
-          if(r.length===0) return;
-          const s = {
-            id: r[idx("id")] || crypto.randomUUID(),
-            name: r[idx("name")] || "科目",
-            examDate: r[idx("examDate")] || todayISO,
-            totalUnits: parseInt(r[idx("totalUnits")]||"0",10),
-            minsPerUnit: parseInt(r[idx("minsPerUnit")]||"15",10),
-            difficulty: r[idx("difficulty")]||"normal",
-            intervals: (r[idx("intervals")]||"0 1 3 7 14 30").split(/\s+/).map(x=>parseInt(x,10)),
-            progress: parseInt(r[idx("progress")]||"0",10)
-          };
-          if(ids.has(s.id)){
-            // 既存IDは上書き（簡便）
-            state.subjects = state.subjects.map(x=> x.id===s.id ? s : x);
-          }else{
-            state.subjects.push(s);
-            ids.add(s.id);
-          }
-        });
-        save(); renderSubjects(); renderCalendars();
-        alert("科目CSVを取り込みました。");
-      }catch(err){ alert("CSV取込に失敗しました"); }
-    }; rd.readAsText(f);
-  });
-
-  // schedule.csv（date,subjectId,review,new）
-  $("#exportScheduleCSV").addEventListener("click", ()=>{
-    const header=["date","subjectId","review","new"];
-    const rows=[header];
-    for(const date in state.schedule){
-      for(const sid in state.schedule[date]){
-        const v=state.schedule[date][sid];
-        rows.push([date,sid,v.review||0,v.new||0]);
-      }
-    }
-    exportCSV("schedule.csv", rows);
-  });
-  $("#importScheduleCSV").addEventListener("click", ()=> $("#importScheduleCSVInput").click());
-  $("#importScheduleCSVInput").addEventListener("change",(e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    const rd=new FileReader(); rd.onload=ev=>{
-      try{
-        const rows=parseCSV(ev.target.result);
-        const [header,...data]=rows;
-        const col=(n)=> header.indexOf(n);
-        data.forEach(r=>{
-          if(r.length<4) return;
-          const date=r[col("date")];
-          const sid=r[col("subjectId")];
-          const rv=parseInt(r[col("review")]||"0",10);
-          const nw=parseInt(r[col("new")]||"0",10);
-          const day = getSchedule(date);
-          ensureSubjSlot(day, sid);
-          day[sid].review = rv;
-          day[sid].new = nw;
-        });
-        save(); renderCalendars();
-        alert("予定CSVを取り込みました。");
-      }catch(err){ alert("CSV取込に失敗しました"); }
-    }; rd.readAsText(f);
-  });
-
-  // --- JSON backup ---
-  $("#exportJSON").addEventListener("click", ()=>{
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="planner_backup.json"; a.click();
-  });
-  $("#importJSON").addEventListener("click", ()=> $("#importJSONInput").click());
-  $("#importJSONInput").addEventListener("change",(e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    const rd=new FileReader(); rd.onload=ev=>{
-      try{ const obj=JSON.parse(ev.target.result); if(obj && obj.subjects && obj.schedule){ localStorage.setItem("fc_planner_full",ev.target.result); location.reload(); } else alert("不正なファイルです"); }
-      catch(err){ alert("読み込みに失敗しました"); }
-    }; rd.readAsText(f);
-  });
-
-  // --- PDF（印刷） ---
-  $("#printPDF").addEventListener("click", ()=>{
-    // 月表示を最新化してから print
-    renderCalendarMonthly();
-    window.print();
-  });
-
-  // --- タブ切替 ---
-  $("#tabContinuous").addEventListener("click", ()=>{
-    $("#viewContinuous").style.display="";
-    $("#viewMonthly").style.display="none";
-  });
-  $("#tabMonthly").addEventListener("click", ()=>{
-    $("#viewContinuous").style.display="none";
-    $("#viewMonthly").style.display="";
-    renderCalendarMonthly();
-  });
-
-  // --- Buttons ---
+  // ===== Wire up buttons =====
   $("#makePlan").addEventListener("click", makeTodayPlan);
-  $("#autoDistribute").addEventListener("click", autoDistributeNew);
+  $("#reflowNew").addEventListener("click", reflowNew);
+  $("#fabMakePlan").addEventListener("click", makeTodayPlan);
+  $("#fabReflow").addEventListener("click", reflowNew);
 
-  // --- Clear all ---
-  $("#clearAll").addEventListener("click", ()=>{
-    if(confirm("全データ（科目と予定）を削除しますか？")){ localStorage.removeItem("fc_planner_full"); location.reload(); }
-  });
-
-  // --- Init ---
-  renderSubjects(); renderCalendars(); makeTodayPlan();
-
-  // --- PWA: manifest + SW（ページ内で動的生成） ---
-  const manifest = {
-    "name":"忘却曲線 学習プランナー",
-    "short_name":"学習プランナー",
-    "start_url":"./",
-    "display":"standalone",
-    "background_color":"#0f1220",
-    "theme_color":"#0f1220",
-    "icons":[
-      {"src":"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='%230f1220'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='72' fill='%23ffffff'>Σ</text></svg>","type":"image/svg+xml","sizes":"128x128"}
-    ]
-  };
-  const manBlob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-  const manURL = URL.createObjectURL(manBlob);
-  $("#manifestLink").setAttribute("href", manURL);
-
-  const swCode = `
-  const CACHE = 'fc-planner-v1';
-  const ASSETS = ['.'];
-  self.addEventListener('install', e=>{
-    e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
-    self.skipWaiting();
-  });
-  self.addEventListener('activate', e=>{
-    e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-    self.clients.claim();
-  });
-  self.addEventListener('fetch', e=>{
-    const req = e.request;
-    if(req.method!=='GET'){ return; }
-    e.respondWith(
-      caches.match(req).then(res => res || fetch(req).then(net=>{
-        const copy = net.clone();
-        caches.open(CACHE).then(c=>c.put(req, copy));
-        return net;
-      }).catch(()=> caches.match('.')))
-    );
-  });
-  `;
-  if('serviceWorker' in navigator){
-    const blob = new Blob([swCode], {type:'text/javascript'});
-    const swURL = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swURL);
-  }
+  // ===== Init =====
+  renderSubjectSelect(); renderSubjectsList(); renderCalendar(); makeTodayPlan();
 })();
 </script>
 </body>
